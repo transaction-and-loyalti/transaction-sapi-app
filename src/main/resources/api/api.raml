@@ -1,0 +1,51 @@
+#%RAML 1.0
+title: transaction-sapi-raml
+version: 1.0.0
+
+traits:
+  clientidsecret: !include ../exchange_modules/e29bb81e-72cc-495b-bd60-0d527c385c88/common-fragments/1.0.3/trait/clientidsecrettrait.raml
+  transactionid: !include ../exchange_modules/e29bb81e-72cc-495b-bd60-0d527c385c88/common-fragments/1.0.3/trait/transactionid-trait.raml
+  businesstrait: !include ../exchange_modules/e29bb81e-72cc-495b-bd60-0d527c385c88/common-fragments/1.0.3/trait/business-trait.raml 
+
+types:
+  cmnerrordatatype: !include ../exchange_modules/e29bb81e-72cc-495b-bd60-0d527c385c88/common-fragments/1.0.3/DataType/errorresponce-dataType.raml
+  posttransresp: !include /examples/DataTypes/posttransresp_datatype.raml
+  posttransreq: !include /examples/DataTypes/posttransreq_datatype.raml 
+/members:
+  /transactions:
+    post:
+      is:
+        - clientidsecret
+        - transactionid
+        - businesstrait
+      body:
+            application/json:
+                  type: posttransreq
+                  example: !include examples/transaction/post transaction request.json 
+      responses:
+          201:
+            body:
+               application/json:
+                  type: posttransresp
+                  example: !include examples/transaction/post transaction response.json
+          400:
+            body:
+               application/json:
+                  type: cmnerrordatatype   
+                  example: !include examples/common/error-400.json
+          401:
+            body:
+               application/json:
+                  type: cmnerrordatatype          
+                  example: !include /examples/common/error-401.json
+          404:
+            body:
+               application/json:
+                  type: cmnerrordatatype
+                  example: !include examples/common/error-404.json
+          500:
+            body:
+               application/json:
+                  type: cmnerrordatatype  
+                  example: !include examples/common/error-500.json
+                   

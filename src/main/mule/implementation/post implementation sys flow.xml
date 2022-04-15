@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="post_implementation_sys_flowFlow" doc:id="a4d0ad99-28ee-4140-a4e4-ac3e904acab3" >
+		<logger level="INFO" doc:name="Logger" doc:id="4aab8004-4e4c-440c-bb93-26144802fa70" message='#[%dw 2.0
+output application/json
+---
+{
+	"flowname": flow.name,
+	"app name": app.name,
+	"status": "before implementation"
+}]'/>
+		<ee:transform doc:name="Transform Message" doc:id="c592572c-37b9-42b7-92df-74691c11ddd3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+	{
+	  "amount__c": vars.requestpayload_var.amount as Number,
+	  "memberId__c": vars.requestpayload_var.memberId ,
+	  "memberTier__c": vars.requestpayload_var.memberTier ,
+	  "transactionDate__c": vars.requestpayload_var.transactionDate,
+	  "transactionId__c": vars.requestpayload_var.transactionId	
+	}
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="8a49050e-4d8e-43d0-a706-90db9a971faa" config-ref="Salesforce_Config" objectType="transactions__c" externalIdFieldName="memberId__c"/>
+		<logger level="INFO" doc:name="Logger" doc:id="1958c18d-ed14-44ef-865c-605ff32cc7d9" message='#[%dw 2.0
+output application/json
+---
+{
+	"flowname": flow.name,
+	"app name": app.name,
+	"status": "after implementation"
+}]'/>
+		<ee:transform doc:name="Transform Message" doc:id="e8dc5657-60da-4310-928f-11bb71a35ec7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  msg: "successful operation",
+  code: 201,
+  success: true,
+  eventId: "jfgsff55ttoxhzxgy",
+  data: {
+    memberId: vars.requestpayload_var.memberId,
+    status: "success"
+  }
+  }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler ref="global_Error_Handler" />
+	</flow>
+</mule>
